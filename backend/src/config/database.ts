@@ -1,5 +1,6 @@
 import { DataSource } from 'typeorm';
 import { User } from '../models/User';
+import { Document } from '../models/Document';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -10,7 +11,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME || 'briefcase_db',
   synchronize: process.env.NODE_ENV === 'development', // Auto-sync schema in dev only
   logging: process.env.NODE_ENV === 'development',
-  entities: [User],
+  entities: [User, Document],
   migrations: ['src/migrations/*.ts'],
   subscribers: [],
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,

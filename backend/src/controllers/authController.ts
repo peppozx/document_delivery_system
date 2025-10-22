@@ -15,7 +15,6 @@ export class AuthController {
    */
   async register(req: Request, res: Response, next: NextFunction) {
     try {
-      // Validate request
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({
@@ -26,7 +25,6 @@ export class AuthController {
 
       const { email, username, password } = req.body;
 
-      // Check if email already exists
       const emailExists = await this.userService.emailExists(email);
       if (emailExists) {
         return res.status(409).json({
@@ -35,7 +33,6 @@ export class AuthController {
         });
       }
 
-      // Check if username already exists
       const usernameExists = await this.userService.usernameExists(username);
       if (usernameExists) {
         return res.status(409).json({
@@ -44,10 +41,8 @@ export class AuthController {
         });
       }
 
-      // Hash password
       const passwordHash = await this.authService.hashPassword(password);
 
-      // Create user
       const user = await this.userService.create({
         email,
         username,
@@ -55,15 +50,12 @@ export class AuthController {
         role: 'user'
       });
 
-      // Generate tokens
       const tokens = this.authService.generateTokenPair(user);
 
-      // Save refresh token
       await this.userService.updateRefreshToken(user.id, tokens.refreshToken);
 
       logger.info(`New user registered: ${user.email}`);
 
-      // Send response
       res.status(201).json({
         success: true,
         message: 'Registration successful',
@@ -89,7 +81,6 @@ export class AuthController {
    */
   async login(req: Request, res: Response, next: NextFunction) {
     try {
-      // Validate request
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({
@@ -100,7 +91,6 @@ export class AuthController {
 
       const { email, password } = req.body;
 
-      // Find user
       const user = await this.userService.findByEmail(email);
       if (!user) {
         return res.status(401).json({
@@ -109,7 +99,6 @@ export class AuthController {
         });
       }
 
-      // Check if user is active
       if (!user.is_active) {
         return res.status(403).json({
           success: false,
@@ -117,7 +106,6 @@ export class AuthController {
         });
       }
 
-      // Verify password
       const isValidPassword = await this.authService.verifyPassword(
         password,
         user.password_hash
@@ -130,10 +118,8 @@ export class AuthController {
         });
       }
 
-      // Generate tokens
       const tokens = this.authService.generateTokenPair(user);
 
-      // Save refresh token
       await this.userService.updateRefreshToken(user.id, tokens.refreshToken);
 
       logger.info(`User logged in: ${user.email}`);
@@ -172,7 +158,6 @@ export class AuthController {
         });
       }
 
-      // Verify refresh token
       const decoded = this.authService.verifyRefreshToken(refreshToken);
       if (!decoded) {
         return res.status(401).json({
@@ -181,7 +166,6 @@ export class AuthController {
         });
       }
 
-      // Find user and verify stored refresh token
       const user = await this.userService.findById(decoded.userId);
       if (!user || user.refresh_token !== refreshToken) {
         return res.status(401).json({
@@ -190,10 +174,8 @@ export class AuthController {
         });
       }
 
-      // Generate new token pair
       const tokens = this.authService.generateTokenPair(user);
 
-      // Update refresh token in database
       await this.userService.updateRefreshToken(user.id, tokens.refreshToken);
 
       res.json({
@@ -216,7 +198,6 @@ export class AuthController {
       const userId = req.user?.id;
 
       if (userId) {
-        // Remove refresh token from database
         await this.userService.updateRefreshToken(userId, null);
         logger.info(`User logged out: ${req.user?.email}`);
       }

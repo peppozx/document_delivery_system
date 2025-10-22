@@ -30,7 +30,6 @@ export const errorHandler = (
   const statusCode = err.statusCode || err.status || 500;
   const message = err.message || 'Internal Server Error';
 
-  // Log error details
   logger.error({
     status: statusCode,
     message,

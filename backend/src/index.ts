@@ -11,12 +11,10 @@ const PORT = config.PORT;
  */
 async function startServer() {
   try {
-    // Initialize database connection
     await AppDataSource.initialize();
     logger.info('Database connected successfully');
     logger.info(`Database: ${config.DB_NAME} at ${config.DB_HOST}:${config.DB_PORT}`);
 
-    // Start Express server
     app.listen(PORT, () => {
       logger.info(`Server is running on port ${PORT}`);
       logger.info(`Environment: ${config.NODE_ENV}`);

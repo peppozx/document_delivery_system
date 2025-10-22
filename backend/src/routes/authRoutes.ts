@@ -7,10 +7,8 @@ import { authMiddleware } from '../middleware/authMiddleware';
 const router = Router();
 const authController = new AuthController();
 
-// Apply rate limiting to all auth routes
 router.use(authRateLimiter);
 
-// Public routes
 router.post(
   '/register',
   validateRegister,
@@ -29,7 +27,6 @@ router.post(
   authController.refreshToken.bind(authController)
 );
 
-// Protected routes
 router.post(
   '/logout',
   authMiddleware,

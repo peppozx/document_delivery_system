@@ -13,7 +13,6 @@ export const authMiddleware = async (
   next: NextFunction
 ) => {
   try {
-    // Get token from Authorization header
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -26,7 +25,6 @@ export const authMiddleware = async (
     // Extract token (remove 'Bearer ' prefix)
     const token = authHeader.substring(7);
 
-    // Verify token
     const payload = authService.verifyAccessToken(token);
 
     if (!payload) {
@@ -36,7 +34,6 @@ export const authMiddleware = async (
       });
     }
 
-    // Attach user data to request
     req.user = {
       id: payload.userId,
       email: payload.email,
@@ -49,38 +46,6 @@ export const authMiddleware = async (
       success: false,
       error: 'Authentication failed'
     });
-  }
-};
-
-/**
- * Optional authentication middleware
- * Does not fail if no token is provided, but attaches user if valid token exists
- */
-export const optionalAuthMiddleware = async (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const authHeader = req.headers.authorization;
-
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
-      const payload = authService.verifyAccessToken(token);
-
-      if (payload) {
-        req.user = {
-          id: payload.userId,
-          email: payload.email,
-          role: payload.role
-        };
-      }
-    }
-
-    next();
-  } catch (error) {
-    // Continue without authentication
-    next();
   }
 };
 

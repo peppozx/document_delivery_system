@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: briefcase_postgres
+    environment:
+      POSTGRES_USER: briefcase_user
+      POSTGRES_PASSWORD: briefcase_password
+      POSTGRES_DB: briefcase_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - briefcase_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U briefcase_user -d briefcase_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: briefcase_backend
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: briefcase_user
+      DB_PASSWORD: briefcase_password
+      DB_NAME: briefcase_db
+      JWT_SECRET: your_super_secret_jwt_key_change_this_in_production
+      JWT_REFRESH_SECRET: your_refresh_secret_key_change_this_in_production
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      ENCRYPTION_KEY: briefcase_encryption_key_for_development_only
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - uploads_data:/app/uploads
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - briefcase_network
+    command: npm run dev
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: briefcase_frontend
+    environment:
+      VITE_API_URL: http://localhost:3000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - briefcase_network
+    command: npm run dev
+
+volumes:
+  postgres_data:
+  uploads_data:
+
+networks:
+  briefcase_network:
+    driver: bridge
