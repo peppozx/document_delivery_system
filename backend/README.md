@@ -142,13 +142,6 @@ curl http://localhost:3000/api/auth/me \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-## Test Users
-
-The database is seeded with test users (password: `Test123!`):
-- `alice@briefcase.com` (user role)
-- `bob@briefcase.com` (user role)
-- `admin@briefcase.com` (admin role)
-
 ## Environment Variables
 
 See `.env.example` for all available configuration options.
@@ -207,14 +200,6 @@ docker exec -it briefcase_backend sh
 docker exec -it briefcase_postgres psql -U briefcase_user -d briefcase_db
 ```
 
-## Next Steps (Phase 2)
-
-- [ ] Document upload with Multer
-- [ ] File encryption at rest (AES-256-GCM)
-- [ ] Document sharing between users
-- [ ] View limits and expiration
-- [ ] Auto-deletion after expiration or max views
-
 ## Security Notes
 
 - All passwords are hashed using bcrypt (10 salt rounds)
@@ -222,7 +207,6 @@ docker exec -it briefcase_postgres psql -U briefcase_user -d briefcase_db
 - Rate limiting is applied to prevent brute force attacks
 - CORS is configured for specific origins
 - Helmet is used for basic security headers
-- File upload validation will be implemented in Phase 2
 
 ## License
 

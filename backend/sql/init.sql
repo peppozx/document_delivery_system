@@ -39,21 +39,5 @@ CREATE TRIGGER update_users_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
--- Seed test users (passwords are hashed with bcrypt)
--- Password for all test users: Test123!
--- Hash generated using bcrypt with 10 salt rounds
-INSERT INTO users (email, username, password_hash, role) VALUES
-    ('alice@briefcase.com', 'alice', '$2a$10$Kx5YJZ.X9YcG8JZQvXZ.7eYnJN7KvQH3gOXz7hQrXZgJXGvQXvZ7K', 'user'),
-    ('bob@briefcase.com', 'bob', '$2a$10$Kx5YJZ.X9YcG8JZQvXZ.7eYnJN7KvQH3gOXz7hQrXZgJXGvQXvZ7K', 'user'),
-    ('admin@briefcase.com', 'admin', '$2a$10$Kx5YJZ.X9YcG8JZQvXZ.7eYnJN7KvQH3gOXz7hQrXZgJXGvQXvZ7K', 'admin')
-ON CONFLICT (email) DO NOTHING;
-
 -- Log completion
-DO $$
-BEGIN
-    RAISE NOTICE 'Database initialization completed successfully';
-    RAISE NOTICE 'Test users created:';
-    RAISE NOTICE '  - alice@briefcase.com / Test123!';
-    RAISE NOTICE '  - bob@briefcase.com / Test123!';
-    RAISE NOTICE '  - admin@briefcase.com / Test123! (admin role)';
-END $$;
+RAISE NOTICE 'Database initialization completed successfully';

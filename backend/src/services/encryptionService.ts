@@ -34,19 +34,15 @@ export class EncryptionService {
    */
   encryptFile(fileBuffer: Buffer): EncryptionResult {
     try {
-      // Generate a random initialization vector
       const iv = crypto.randomBytes(16);
 
-      // Create cipher
       const cipher = crypto.createCipheriv(this.algorithm, this.encryptionKey, iv);
 
-      // Encrypt the file
       const encryptedData = Buffer.concat([
         cipher.update(fileBuffer),
         cipher.final()
       ]);
 
-      // Get authentication tag (for GCM mode)
       const authTag = cipher.getAuthTag();
 
       return {
@@ -65,17 +61,13 @@ export class EncryptionService {
    */
   decryptFile(encryptedData: Buffer, ivHex: string, authTagHex: string): Buffer {
     try {
-      // Convert hex strings back to buffers
       const iv = Buffer.from(ivHex, 'hex');
       const authTag = Buffer.from(authTagHex, 'hex');
 
-      // Create decipher
       const decipher = crypto.createDecipheriv(this.algorithm, this.encryptionKey, iv);
 
-      // Set authentication tag
       decipher.setAuthTag(authTag);
 
-      // Decrypt the file
       const decryptedData = Buffer.concat([
         decipher.update(encryptedData),
         decipher.final()
