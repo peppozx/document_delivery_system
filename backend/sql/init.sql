@@ -40,4 +40,7 @@ CREATE TRIGGER update_users_updated_at
     EXECUTE FUNCTION update_updated_at_column();
 
 -- Log completion
-RAISE NOTICE 'Database initialization completed successfully';
+DO $$
+BEGIN
+    RAISE NOTICE 'Database initialization completed successfully';
+END $$;
