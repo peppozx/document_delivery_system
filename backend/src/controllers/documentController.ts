@@ -26,6 +26,19 @@ export class DocumentController {
       }
 
       const { recipient_id, view_limit, expires_at } = req.body;
+      // FEATURE: Sensitive documents - We would need to add the is_sensitive and access_password to the request body
+      /*
+        const { is_sensitive, access_password } = req.body;
+        if (is_sensitive) {
+          if (!access_password) {
+            return res.status(400).json({
+              success: false,
+              error: 'Access password is required for sensitive documents'
+            });
+          }
+        }
+      */
+
       const senderId = req.user?.id;
 
       if (!senderId) {
@@ -79,6 +92,15 @@ export class DocumentController {
 
       await fs.unlink(tempFilePath);
 
+      // FEATURE: Sensitive documents - Here we need to hash the access_password if it is provided
+      /*
+        let access_password_hash: string | undefined;
+        if (is_sensitive) {
+          const passwordHashed = await this.authService.hashPassword(access_password);
+          access_password_hash = passwordHashed;
+        }
+      */
+
       const document = await this.documentService.create({
         filename: req.file.originalname,
         encrypted_filename: encryptedFilename,
@@ -90,6 +112,9 @@ export class DocumentController {
         encryption_auth_tag: encryptionResult.authTag,
         view_limit: view_limit ? parseInt(view_limit) : undefined,
         expires_at: expiresAt
+        // FEATURE: Sensitive documents - Here we need to add the is_sensitive and access_password_hash to the request body
+        // isSensitive: is_sensitive,
+        // accessPasswordHash: access_password_hash
       });
 
       logger.info(`Document uploaded: ${document.id} from ${senderId} to ${recipient_id}`);
@@ -124,6 +149,9 @@ export class DocumentController {
       const { id } = req.params;
       const userId = req.user?.id;
 
+      // FEATURE: Sensitive documents - We would need to change the request method to POST and add the access_password to the request body
+      // const { access_password } = req.body;
+
       if (!userId) {
         return res.status(401).json({
           success: false,
@@ -152,6 +180,25 @@ export class DocumentController {
       // Read encrypted file
       const encryptedFilePath = this.documentService.getDocumentPath(document.encrypted_filename);
       const encryptedData = await fs.readFile(encryptedFilePath);
+
+
+      // FEATURE: Sensitive documents - We would need to decrypt the access_password_hash to check if the access_password is correct
+      // if (document.is_sensitive) {
+      //   if (!access_password) {
+      //     return res.status(400).json({
+      //       success: false,
+      //       error: 'Access password is required for sensitive documents'
+      //     });
+      //   }
+
+      //   const passwordHashed = await this.authService.comparePassword(access_password, document.access_password_hash);
+      //   if (!passwordHashed) {
+      //     return res.status(400).json({
+      //       success: false,
+      //       error: 'Invalid access password'
+      //     });
+      //   }
+      // }
 
       // Decrypt file
       const decryptedData = this.encryptionService.decryptFile(

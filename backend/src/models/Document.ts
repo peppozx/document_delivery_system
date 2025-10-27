@@ -49,6 +49,15 @@ export class Document {
   @CreateDateColumn()
   created_at: Date;
 
+  // FEATURE: Sensitive documents
+  // Here we need at least these 2 properties to be able to handle sensitive documents
+  // @Column({ type: 'boolean', default: false })
+  // is_sensitive: boolean;
+
+  // @Column({ type: 'text', nullable: true })
+  // access_password_hash: string | null;
+  // END FEATURE: Sensitive documents
+
   // Relations
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'sender_id' })
